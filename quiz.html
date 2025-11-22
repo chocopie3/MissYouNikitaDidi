@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Farewell Quiz — Nikita Didi 🧠</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    body {
+      background: linear-gradient(180deg, #fffaf7 0%, #f7f0ff 60%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, 'Arial', sans-serif;
+      color: #3b2350;
+      overflow-x: hidden;
+    }
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 48px 20px;
+      box-sizing: border-box;
+    }
+    .quiz-inner {
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+      background: rgba(255,255,255,0.85);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 8px 30px rgba(71,45,110,0.08);
+      position: relative;
+    }
+    .quiz-banner {
+      font-size: 1.6rem;
+      color: #6a2b8f;
+      margin: 0 0 12px 0;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      display: inline-block;
+      background: linear-gradient(90deg,#fbefff, #f0e6ff);
+      padding: 10px 18px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(106,43,143,0.08);
+    }
+    .quiz-emoji {
+      font-size: 2.1rem;
+      display: inline-block;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    .quiz-desc {
+      font-size: 1rem;
+      color: #4a2c5f;
+      text-align: center;
+      margin: 18px auto;
+      font-weight: 500;
+      background: rgba(255,250,250,0.9);
+      border-radius: 10px;
+      padding: 12px 16px;
+      max-width: 560px;
+    }
+    .quiz-link-area {
+      margin: 22px auto;
+      font-size: 1rem;
+      color: #3b2350;
+      text-align: center;
+      background: linear-gradient(90deg,#fff9fb,#fff8f2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 14px rgba(106,43,143,0.06);
+      word-break: break-all;
+    }
+    .quiz-link-area a { color: #7c3aa6; font-weight: 700; text-decoration: none; }
+    .quiz-back { display: inline-block; margin-top: 18px; }
+    .confetti-canvas {
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 40;
+    }
+    @media (max-width:480px){
+      .quiz-inner { padding: 18px; }
+      .quiz-banner { font-size: 1.2rem; }
+      .quiz-emoji { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="quiz-inner" role="main" aria-labelledby="quizTitle">
+      <div>
+        <span class="quiz-emoji" aria-hidden="true">🧠</span>
+        <h1 id="quizTitle" class="quiz-banner">Welcome to the ultimate test of IQ.</h1>
+      </div>
+      <p class="quiz-desc">
+       Are you ready to prove you can handle outside this school challenges and actually use ur IQ? (no offence sryy)<br>
+        Light confetti, zero judgment, and maximum fun.<br>
+      </p>
+      <div class="quiz-link-area" id="quizLinkArea">
+        <!-- Paste your quiz link here later -->
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSerPCB-KME6pwz2yCpcS32C4LL072djvdFOcYBy5ugt2atXSg/viewform?usp=dialog" target="_blank" rel="noopener">Open your IQ Test</a>
+      </div>
+      <a href="giftroom.html" class="btn quiz-back" aria-label="Back to Gift Room">&#8592; Back to Farewell Room</a>
+    </div>
+    <canvas id="confettiQuiz" class="confetti-canvas" aria-hidden="true"></canvas>
+  </div>
+  <script>
+    // Responsive confetti canvas with controlled particle count
+    (function(){
+      const canvas = document.getElementById('confettiQuiz');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      function spawnParticle() {
+        particles.push({
+          x: Math.random()*canvas.width,
+          y: -10,
+          r: Math.random()*6+3,
+          c: `hsl(${Math.random()*60+260},80%,60%)`,
+          vx: (Math.random()-0.5)*2,
+          vy: Math.random()*2+1,
+          g: 0.04+Math.random()*0.04,
+          life: 0
+        });
+      }
+      function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if (particles.length < Math.min(60, Math.floor(canvas.width/14))) spawnParticle();
+        for (let i = particles.length-1; i >= 0; i--) {
+          const p = particles[i];
+          ctx.beginPath();
+          ctx.fillStyle = p.c;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.x + p.y) * 0.002);
+          ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*0.6);
+          ctx.restore();
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.g;
+          p.life++;
+          if (p.y > canvas.height + 30 || p.life > 400) particles.splice(i,1);
+        }
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
+  </script>
+</body>
+</html>

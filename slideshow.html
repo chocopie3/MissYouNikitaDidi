@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Memory Tape 📼</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    body {
+      background: linear-gradient(120deg, #f8e7c6 0%, #e7d6ff 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+    .tape-container {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;
+      position: relative;
+    }
+    .tape-title {
+      font-size: 2em; color: #c77d2c; margin-bottom: 18px; text-shadow: 0 2px 12px #fff;
+      font-weight: 700;
+    }
+    /* tape area: padded container so media can have rounded corners */
+    .tape-area {
+      position: relative;
+      width: 340px;
+      height: 260px;
+      margin-bottom: 24px;
+      padding: 10px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fffbe6cc;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px #e7d6ff44;
+      overflow: hidden;
+    }
+    /* media wrapper fills the available area */
+    #tapeMedia {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Reused by both <img> and <video> — ensures the whole media fits without cropping */
+    .tape-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #c77d2c44;
+      transition: box-shadow 0.4s, transform 0.4s;
+      background: #e7d6ff;
+    }
+    /* rotate portrait photo_roll_1..photo_roll_5 to appear horizontal while fitting container */
+    .tape-img.rotate-horizontal {
+      transform: rotate(-90deg);
+      transform-origin: center center;
+      /* ensure rotated image still fits without overflow */
+      width: auto;
+      height: 100%;
+      object-fit: contain;
+    }
+    .tape-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 2.2em; color: #c77d2c; background: #fffbe6cc; border-radius: 50%; width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none;
+      box-shadow: 0 2px 8px #e7d6ff44;
+      transition: background 0.2s;
+      z-index: 2;
+    }
+    .tape-arrow:hover { background: #e7d6ffcc; }
+    .tape-arrow.left { left: 8px; }
+    .tape-arrow.right { right: 8px; }
+    .tape-caption {
+      margin-top: 12px; font-size: 1.08em; color: #c77d2c; text-align: center; font-weight: 500;
+      background: #fffbe6cc; border-radius: 12px; padding: 6px 18px; box-shadow: 0 2px 8px #e7d6ff44;
+      min-height: 32px;
+    }
+    .tape-back {
+      margin-top: 38px;
+    }
+    .tape-anim {
+      animation: tapeMove 1.2s;
+    }
+    @keyframes tapeMove {
+      0% { transform: scale(0.98) translateY(12px);}
+      50% { transform: scale(1.03) translateY(-8px);}
+      100% { transform: scale(1) translateY(0);}
+    }
+    /* thumbnail strip for first 5 photos */
+    .thumb-strip {
+      width: 100%;
+      max-width: 340px;
+      margin: 10px 0 6px;
+      display: flex;
+      gap: 8px;
+      padding: 6px;
+      box-sizing: border-box;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .thumb-strip::-webkit-scrollbar { height: 8px; }
+    .thumb {
+      flex: 0 0 auto;
+      width: 72px;
+      height: 52px;
+      border-radius: 8px;
+      object-fit: cover;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 2px solid transparent;
+      transition: transform .12s ease, border-color .12s ease, opacity .12s;
+      opacity: 0.95;
+    }
+    .thumb:active { transform: scale(0.98); }
+    .thumb.selected {
+      border-color: #c77d2c;
+      opacity: 1;
+      box-shadow: 0 4px 14px rgba(199,125,44,0.14);
+    }
+  </style>
+</head>
+<body>
+  <div class="tape-container">
+    <div class="tape-title">📼 Memory Tape</div>
+    <div class="tape-area">
+      <div class="tape-arrow left" id="arrowLeft">&#8592;</div>
+      <!-- media container: JS will inject either <img> or <video> here -->
+      <div id="tapeMedia" class="tape-anim"></div>
+      <div class="tape-arrow right" id="arrowRight">&#8594;</div>
+    </div>
+
+    <!-- horizontal thumbnail strip (photo_roll_1 to photo_roll_5) -->
+    <div id="thumbStrip" class="thumb-strip" aria-hidden="false"></div>
+
+    <div class="tape-caption" id="tapeCaption">WE WILL MISS YOU!</div>
+    <a href="giftroom.html" class="btn tape-back">&#8592; Back to Gift Room</a>
+  </div>
+  <script>
+    // Images and captions (add more as needed)
+    const images = [
+      { src: "images/photo_roll_1.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/photo_roll_2.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/photo_roll_3.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/photo_roll_4.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/photo_roll_5.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/photo_roll_6.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/photo_roll_7.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/photo_roll_8.jpg", caption: "WE WILL MISS YOU!" },
+      { src: "images/video_tape_1.mp4", caption: "A special video memory" },
+      { src: "images/video_tape_2.mp4", caption: "Another memorable clip" }
+      // Add more images/captions here if you want!
+    ];
+    let idx = 0;
+    const tapeMedia = document.getElementById('tapeMedia');
+    const tapeCaption = document.getElementById('tapeCaption');
+    const arrowLeft = document.getElementById('arrowLeft');
+    const arrowRight = document.getElementById('arrowRight');
+
+    // thumbnail strip element
+    const thumbStrip = document.getElementById('thumbStrip');
+
+    // render thumbnails for first five items that are images (indices 0..4)
+    function renderThumbs() {
+      thumbStrip.innerHTML = '';
+      for (let i = 0; i < Math.min(5, images.length); i++) {
+        const it = images[i];
+        const src = it.src.toLowerCase();
+        // only show image thumbnails (skip videos)
+        if (src.endsWith('.jpg') || src.endsWith('.jpeg') || src.endsWith('.png') || src.endsWith('.gif')) {
+          const th = document.createElement('img');
+          th.src = it.src;
+          th.alt = it.caption || `Photo ${i+1}`;
+          th.className = 'thumb';
+          th.dataset.index = i;
+          th.addEventListener('click', () => {
+            idx = i;
+            showMedia(idx);
+          });
+          thumbStrip.appendChild(th);
+        }
+      }
+      updateThumbSelection();
+    }
+
+    // Show image or video depending on file extension
+    function showMedia(i) {
+      const item = images[i];
+      tapeMedia.classList.remove('tape-anim');
+      // pause and remove any previous video
+      const prev = tapeMedia.querySelector('video');
+      if (prev) {
+        try { prev.pause(); } catch(e) {}
+      }
+      // small delay for transition
+      setTimeout(() => {
+        tapeMedia.innerHTML = '';
+        tapeCaption.textContent = item.caption || '';
+        const src = item.src.toLowerCase();
+        if (src.endsWith('.mp4') || src.endsWith('.webm') || src.endsWith('.ogg')) {
+          const v = document.createElement('video');
+          v.className = 'tape-img';
+          v.src = item.src;
+          v.controls = true;
+          v.playsInline = true;
+          v.muted = true;       // allow autoplay on most browsers
+          v.autoplay = true;
+          v.loop = false;
+          v.preload = 'metadata';
+          v.style.display = 'block';
+          tapeMedia.appendChild(v);
+          // try to play; if blocked it will show controls so user can play
+          v.play().catch(()=>{ /* autoplay blocked; user can press play */ });
+        } else {
+          const im = document.createElement('img');
+          im.className = 'tape-img';
+          im.src = item.src;
+          im.alt = item.caption || '';
+          // If this is one of the photo_roll_1..photo_roll_5 files, rotate to display horizontally
+          if (/photo_roll_[1-5]\.(jpg|jpeg|png|gif)$/i.test(item.src)) {
+            im.classList.add('rotate-horizontal');
+          }
+          tapeMedia.appendChild(im);
+        }
+        // re-add animation class
+        void tapeMedia.offsetWidth;
+        tapeMedia.classList.add('tape-anim');
+        updateThumbSelection();
+      }, 120);
+    }
+
+    function updateThumbSelection() {
+      const thumbs = thumbStrip.querySelectorAll('.thumb');
+      thumbs.forEach(t => {
+        t.classList.toggle('selected', Number(t.dataset.index) === idx);
+      });
+      // if selected thumb exists, ensure it's visible in the strip
+      const sel = thumbStrip.querySelector('.thumb.selected');
+      if (sel) sel.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
+    arrowLeft.onclick = () => {
+      idx = (idx - 1 + images.length) % images.length;
+      showMedia(idx);
+    };
+    arrowRight.onclick = () => {
+      idx = (idx + 1) % images.length;
+      showMedia(idx);
+    };
+
+    // initialize with first media
+    renderThumbs();
+    showMedia(idx);
+  </script>
+</body>
+</html>
